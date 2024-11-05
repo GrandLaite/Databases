@@ -244,11 +244,6 @@ INSERT INTO Sales_Forecast (product_id, forecasted_sales, forecast_date) VALUES
 (5, 20, '2024-04-01'),
 (6, 15, '2024-04-01');
 
-/* Задание №1 */
-
-
-
-
 /* Задание №2 */
 
 /* Создаём процедуру */
