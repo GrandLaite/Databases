@@ -293,3 +293,5 @@ CALL update_pricing_and_apply_discount();
 SELECT product_id, base_price, final_price, last_discount_date
 FROM Pricing
 WHERE product_id = 1;
+
+https://replit.com/@sapporoperl/FrankMinorAccounting#main.cpp
