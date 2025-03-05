@@ -100,3 +100,41 @@ INSERT INTO Supply (supply_id, supplier_id, supply_date, product_id, quantity) V
 (8, 4, '2024-08-01', 5, 120),
 (9, 7, '2023-07-20', 1, 100),  
 (10, 7, '2024-02-15', 2, 50);  
+
+-- 1. Добавляем страну
+INSERT INTO Country (country_id, country_name) VALUES (1, 'Россия');
+
+-- 2. Добавляем город, ссылаясь на страну
+INSERT INTO City (city_id, country_id, city_name) VALUES (1, 1, 'Москва');
+
+-- 3. Добавляем улицу, ссылаясь на город
+INSERT INTO Street (street_id, city_id, street_name) VALUES (1, 1, 'Ленина');
+
+-- 4. Добавляем адрес поставщика, ссылаясь на улицу
+INSERT INTO Supplier_Address (address_id, street_id, building) VALUES (1, 1, '25А');
+
+-- 5. Добавляем поставщика, ссылаясь на адрес
+INSERT INTO Supplier (supplier_id, last_name, first_name, middle_name, phone, address_id)
+VALUES (1, 'Иванов', 'Иван', 'Иванович', '+79421512561', 1);
+
+-- 6. Добавляем товар
+INSERT INTO Product (product_id, product_name) VALUES (1, 'Молоко');
+
+-- 7. Добавляем поставку, ссылаясь на поставщика и товар
+INSERT INTO Supply (supply_id, supplier_id, supply_date, product_id, quantity)
+VALUES (10, 1, CURRENT_DATE, 1, 50);
+
+-- 8. Добавляем цену товара
+INSERT INTO Pricing (pricing_id, product_id, price, price_date)
+VALUES (1, 1, 120.00, CURRENT_DATE);
+
+-- 9. Добавляем адрес покупателя, ссылаясь на улицу
+INSERT INTO Customer_Address (address_id, street_id, building) VALUES (2, 1, '30Б');
+
+-- 10. Добавляем покупателя, ссылаясь на адрес
+INSERT INTO Customer (customer_id, last_name, first_name, middle_name, birth_date, address_id)
+VALUES (1, 'Петров', 'Пётр', 'Петрович', '1985-02-03', 2);
+
+-- 11. Добавляем заказ покупателя на товар
+INSERT INTO Customer_Order (order_id, order_date, customer_id, product_id, quantity)
+VALUES (1, CURRENT_DATE, 1, 1, 10);
