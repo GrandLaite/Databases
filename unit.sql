@@ -447,6 +447,9 @@ GRANT EXECUTE ON FUNCTION insert_supply_if_not_exists(INT, DATE, INT, INT)
   TO merchandiser_role;
 
 GRANT INSERT ON Supply TO merchandiser_role;
+GRANT SELECT, INSERT ON Supply TO merchandiser_role;
+GRANT USAGE, SELECT ON SEQUENCE supply_seq TO merchandiser_role;
+
 
 /*
 CREATE USER merch1 WITH PASSWORD '1';
