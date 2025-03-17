@@ -329,11 +329,14 @@ END;
 $$;
 
 -- Даем право выполнять функцию
+-- Разрешаем смотреть количество товаров
+GRANT SELECT ON Supply TO seller_role;
+
+-- Разрешаем смотреть Pricing, чтобы WHERE и подзапрос работали
+GRANT SELECT, UPDATE ON Pricing TO seller_role;
+
+-- Даем право выполнять саму функцию
 GRANT EXECUTE ON FUNCTION update_price_if_stock_low(INT, DECIMAL) TO seller_role;
-
--- Даем продавцу право изменять цену в таблице Pricing
-GRANT UPDATE (price) ON Pricing TO seller_role;
-
 /*
 CREATE USER sel1 WITH PASSWORD '1';
 GRANT seller_role TO sel1;
