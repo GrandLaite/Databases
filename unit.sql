@@ -192,13 +192,13 @@ CREATE TABLE Supplier_Login (
 );
 
 -- 3) Процедура \"register_supplier\" (авторегистрация)
-CREATE OR REPLACE PROCEDURE register_supplier (
+CREATE OR REPLACE PROCEDURE register_supplier(
     new_supplier_id INT,
-    new_last_name VARCHAR(255),
-    new_first_name VARCHAR(255),
-    new_middle_name VARCHAR(255),
-    new_phone VARCHAR(20),
-    new_address_id INT
+    new_last_name   TEXT,
+    new_first_name  TEXT,
+    new_middle_name TEXT,
+    new_phone       TEXT,
+    new_address_id  INT
 )
 LANGUAGE plpgsql
 AS $$
