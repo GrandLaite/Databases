@@ -292,6 +292,8 @@ SELECT * FROM my_supplies_view;
 -- 1) Роль продавца
 CREATE ROLE seller_role;
 
+GRANT SELECT ON Supply TO seller_role;
+
 -- 2) Функция update_price_if_stock_low
 CREATE OR REPLACE FUNCTION update_price_if_stock_low(
     p_product_id INT,
