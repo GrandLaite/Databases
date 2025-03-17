@@ -245,7 +245,7 @@ JOIN Supplier_Login sl ON s.supplier_id = sl.supplier_id
 WHERE sl.login = CURRENT_USER;
 
 -- 5) Права
-GRANT EXECUTE ON PROCEDURE register_supplier(
+GRANT EXECUTE ON FUNCTION register_supplier(
     INT, TEXT, TEXT, TEXT, TEXT, INT
 )
 TO supplier_role;
