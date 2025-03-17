@@ -303,15 +303,26 @@ RETURNS TEXT
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    total_in_stock INT;
+    total_in_stock  INT;
+    cnt_in_pricing  INT;
 BEGIN
-    -- Проверяем общее количество товара в наличии
+    -- 1) Проверяем, есть ли такой товар в Pricing
+    SELECT COUNT(*)
+      INTO cnt_in_pricing
+      FROM Pricing
+     WHERE product_id = p_product_id;
+
+    IF cnt_in_pricing = 0 THEN
+        RETURN 'Ошибка: product_id=' || p_product_id || ' отсутствует в таблице Pricing!';
+    END IF;
+
+    -- 2) Считаем общее кол-во товара в Supply
     SELECT COALESCE(SUM(quantity), 0)
       INTO total_in_stock
       FROM Supply
      WHERE product_id = p_product_id;
 
-    -- Если товара меньше 10 штук, обновляем цену
+    -- 3) Если товара мало (<10), пробуем обновить цену
     IF total_in_stock < 10 THEN
         UPDATE Pricing
            SET price = p_new_price
@@ -327,6 +338,7 @@ BEGIN
     END IF;
 END;
 $$;
+
 
 -- Даем право выполнять функцию
 -- Разрешаем смотреть количество товаров
