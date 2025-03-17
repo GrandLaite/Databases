@@ -358,6 +358,7 @@ TO seller_role;
 
 GRANT INSERT ON Supplier       TO seller_role;
 GRANT INSERT ON Supplier_Login TO seller_role;
+GRANT INSERT ON Supply TO seller_role;
 /*
 CREATE USER sel1 WITH PASSWORD '1';
 GRANT seller_role TO sel1;
