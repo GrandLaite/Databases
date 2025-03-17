@@ -448,13 +448,13 @@ GRANT EXECUTE ON FUNCTION insert_supply_if_not_exists(INT, DATE, INT, INT)
 
 GRANT INSERT ON Supply TO merchandiser_role;
 
--- Пример:
---   (i)  CREATE USER merch1 WITH PASSWORD '1';
---        GRANT merchandiser_role TO merch1;
---   (ii) Под merch1:
---        SELECT insert_supply_if_not_exists(100, CURRENT_DATE, 1, 10);
---        Если нет такой записи, вставит; если уже существует, вернёт ошибку.
-
+/*
+CREATE USER merch1 WITH PASSWORD '1';
+GRANT merchandiser_role TO merch1;
+Под merch1:
+SELECT insert_supply_if_not_exists(100, CURRENT_DATE, 1, 10);
+Если нет такой записи, вставит; если уже существует, вернёт ошибку.
+*/
 
 --------------------------------------------------------------------------
 -- (6) ДАЁМ ПРАВО АДМИНИСТРАТОРУ IT УДАЛЯТЬ ПРОЦЕДУРЫ
@@ -473,13 +473,12 @@ ALTER PROCEDURE test_procedure() OWNER TO admin_it_role;
 
 GRANT CREATE ON SCHEMA public TO admin_it_role;
 
--- Пример:
---   (i)  CREATE USER it_admin WITH PASSWORD '1';
---        GRANT admin_it_role TO it_admin;
---   (ii) Под it_admin:
---        DROP PROCEDURE test_procedure();
---        Если другой пользователь попробует, получит \"permission denied\".
-
+/*
+CREATE USER it_admin WITH PASSWORD '1';
+GRANT admin_it_role TO it_admin;
+Под it_admin:
+DROP PROCEDURE test_procedure();
+*/
 
 --------------------------------------------------------------------------
 -- (7) ДОПОЛНИТЕЛЬНЫЕ ТЕСТОВЫЕ ДАННЫЕ ДЛЯ ПРОВЕРКИ
