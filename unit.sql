@@ -259,7 +259,15 @@ GRANT SELECT ON my_supplies_view TO supplier_role;
 --   (i)  Админ создаёт пользователя: CREATE USER sup1 WITH PASSWORD '1';
 --        GRANT supplier_role TO sup1;
 --   (ii) Подключаемся под sup1:
---        CALL register_supplier(100, 'Георгиев', 'Георгий', 'Георгиевич', '+7912000000', 1);
+/*        SELECT register_supplier(
+    100,
+    'Георгиев',
+    'Георгий',
+    'Георгиевич',
+    '+7912000000',
+    1
+);
+*/
 --        Теперь в Supplier появится запись (ID=100), а в Supplier_Login (100, 'sup1').
 --   (iii) Если sup1 внесёт поставку Supply(supplier_id=100), в my_supplies_view она будет видна только ему.
 
