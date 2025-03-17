@@ -294,7 +294,7 @@ CREATE ROLE seller_role;
 
 GRANT SELECT ON Supply TO seller_role;
 
--- 2) Функция update_price_if_stock_low
+-- Функция обновления цены при низком количестве товара
 CREATE OR REPLACE FUNCTION update_price_if_stock_low(
     p_product_id INT,
     p_new_price DECIMAL(10,2)
@@ -305,11 +305,13 @@ AS $$
 DECLARE
     total_in_stock INT;
 BEGIN
+    -- Проверяем общее количество товара в наличии
     SELECT COALESCE(SUM(quantity), 0)
       INTO total_in_stock
       FROM Supply
      WHERE product_id = p_product_id;
 
+    -- Если товара меньше 10 штук, обновляем цену
     IF total_in_stock < 10 THEN
         UPDATE Pricing
            SET price = p_new_price
@@ -326,18 +328,19 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION update_price_if_stock_low(INT, DECIMAL)
-  TO seller_role;
+-- Даем право выполнять функцию
+GRANT EXECUTE ON FUNCTION update_price_if_stock_low(INT, DECIMAL) TO seller_role;
 
--- Продавцу нужно право менять \"price\" в таблице Pricing
+-- Даем продавцу право изменять цену в таблице Pricing
 GRANT UPDATE (price) ON Pricing TO seller_role;
 
--- Пример использования:
---   (i)  Админ: CREATE USER sel1 WITH PASSWORD '1'; GRANT seller_role TO sel1;
---   (ii) sel1: SELECT update_price_if_stock_low(1, 99.99);
---        Если запас (Supply.quantity) для product_id=1 < 10, цена обновится.
+/*
+CREATE USER sel1 WITH PASSWORD '1';
+GRANT seller_role TO sel1;
 
-
+Под sel1:
+SELECT update_price_if_stock_low(1, 99.99);
+*/
 --------------------------------------------------------------------------
 -- (4) ДАЁМ ПРАВО АДМИНИСТРАТОРУ СЧИТЫВАТЬ \"10%\" ИЗ СЕРЕДИНЫ ТАБЛИЦЫ CUSTOMER
 --------------------------------------------------------------------------
