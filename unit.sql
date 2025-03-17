@@ -359,6 +359,11 @@ TO seller_role;
 GRANT INSERT ON Supplier       TO seller_role;
 GRANT INSERT ON Supplier_Login TO seller_role;
 GRANT INSERT ON Supply TO seller_role;
+
+INSERT INTO Supply (supply_id, supplier_id, supply_date, product_id, quantity)
+VALUES 
+    (1, 1, CURRENT_DATE, 1, 8),   -- Поставщик 1 поставляет 8 единиц товара 1
+    (2, 1, CURRENT_DATE, 2, 15);  -- Поставщик 1 поставляет 15 единиц товара 2
 /*
 CREATE USER sel1 WITH PASSWORD '1';
 GRANT seller_role TO sel1;
