@@ -453,17 +453,6 @@ GRANT CREATE ON SCHEMA public TO admin_it_role;
 -- Пример поставщиков / поставок, чтобы всё работало из коробки.
 -- (Можно расширять и изменять при необходимости)
 
--- 1) Добавим одного поставщика вручную (ID=1)
-INSERT INTO Supplier (supplier_id, last_name, first_name, middle_name, phone, address_id)
-VALUES (1, 'Иванов', 'Иван', 'Иванович', '+79000000001', 1);
-
--- 2) Примеры поставок от поставщика 1
-INSERT INTO Supply (supply_id, supplier_id, supply_date, product_id, quantity)
-VALUES
-  (1, 1, CURRENT_DATE, 1, 50),
-  (2, 1, CURRENT_DATE, 2,  5),
-  (3, 1, CURRENT_DATE, 3,  2);
-
 -- 3) Цены
 INSERT INTO Pricing (pricing_id, product_id, price, price_date)
 VALUES
