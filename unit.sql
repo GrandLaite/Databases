@@ -253,21 +253,24 @@ GRANT INSERT ON Supplier       TO supplier_role;
 GRANT INSERT ON Supplier_Login TO supplier_role;
 GRANT SELECT ON my_supplies_view TO supplier_role;
 
--- Пример использования:
---   (i)  Админ создаёт пользователя: CREATE USER sup1 WITH PASSWORD '1';
---        GRANT supplier_role TO sup1;
---   (ii) Подключаемся под sup1:
-/*       CALL register_supplier(
-    100,                      -- supplier_id
-    'Георгиев',               -- last_name
-    'Георгий',                -- first_name
-    'Георгиевич',             -- middle_name
+/*
+CREATE USER sup1 WITH PASSWORD '1';
+GRANT supplier_role TO sup1;
+(ii) Подключаемся под sup1:
+CALL register_supplier(
+    1,                      -- supplier_id
+    'Чиназес',               -- last_name
+    'Йоппер',                -- first_name
+    'Хойкович',             -- middle_name
     '+7912000000',            -- phone
     1                         -- address_id
 );
 
-Теперь в Supplier появится запись (ID=100), а в Supplier_Login (100, 'sup1').
-(iii) Если sup1 внесёт поставку Supply(supplier_id=100), в my_supplies_view она будет видна только ему.
+-- Подключаемся под зарегистрированного поставщика (например, `sup1`) и добавляем поставки
+INSERT INTO Supply (supply_id, supplier_id, supply_date, product_id, quantity)
+VALUES 
+    (1, 1, CURRENT_DATE, 1, 8),  
+    (2, 2, CURRENT_DATE, 2, 12);
 */
 
 
