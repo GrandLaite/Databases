@@ -170,9 +170,18 @@ VALUES
 CREATE ROLE supplier_role;
 GRANT USAGE ON SCHEMA public TO supplier_role;
 GRANT CREATE ON SCHEMA public TO supplier_role;
+-- Сначала даём право supplier_role работать со схемой:
+GRANT USAGE, CREATE ON SCHEMA public TO supplier_role;
+
+-- Теперь разрешаем по умолчанию все необходимые права на новые объекты в схеме:
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
-    GRANT USAGE, CREATE ON SEQUENCES/TABLES/FUNCTIONS ...
-    TO supplier_role;
+  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO supplier_role;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT USAGE, SELECT ON SEQUENCES TO supplier_role;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT EXECUTE ON FUNCTIONS TO supplier_role;
 
 
 -- 2) Таблица Supplier_Login (привязка supplier_id -> CURRENT_USER)
