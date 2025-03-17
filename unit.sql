@@ -192,7 +192,7 @@ CREATE TABLE Supplier_Login (
 );
 
 -- 3) Процедура \"register_supplier\" (авторегистрация)
-CREATE OR REPLACE FUNCTION register_supplier(
+CREATE OR REPLACE PROCEDURE register_supplier(
     new_supplier_id INT,
     new_last_name   TEXT,
     new_first_name  TEXT,
@@ -200,7 +200,6 @@ CREATE OR REPLACE FUNCTION register_supplier(
     new_phone       TEXT,
     new_address_id  INT
 )
-RETURNS void
 LANGUAGE plpgsql
 AS $$
 BEGIN
@@ -227,10 +226,9 @@ BEGIN
 END;
 $$;
 
--- ДАЁМ ПРАВА supplier_role вызывать эту функцию
-GRANT EXECUTE ON FUNCTION register_supplier(int, text, text, text, text, int)
+-- ДАЁМ ПРАВА supplier_role вызывать процедуру
+GRANT EXECUTE ON PROCEDURE register_supplier(int, text, text, text, text, int)
   TO supplier_role;
-
 -- 4) Представление \"my_supplies_view\" (только свои поставки)
 CREATE OR REPLACE VIEW my_supplies_view AS
 SELECT
@@ -245,7 +243,7 @@ JOIN Supplier_Login sl ON s.supplier_id = sl.supplier_id
 WHERE sl.login = CURRENT_USER;
 
 -- 5) Права
-GRANT EXECUTE ON FUNCTION register_supplier(
+GRANT EXECUTE ON PROCEDURE register_supplier(
     INT, TEXT, TEXT, TEXT, TEXT, INT
 )
 TO supplier_role;
@@ -259,17 +257,18 @@ GRANT SELECT ON my_supplies_view TO supplier_role;
 --   (i)  Админ создаёт пользователя: CREATE USER sup1 WITH PASSWORD '1';
 --        GRANT supplier_role TO sup1;
 --   (ii) Подключаемся под sup1:
-/*        SELECT register_supplier(
-    100,
-    'Георгиев',
-    'Георгий',
-    'Георгиевич',
-    '+7912000000',
-    1
+/*       CALL register_supplier(
+    100,                      -- supplier_id
+    'Георгиев',               -- last_name
+    'Георгий',                -- first_name
+    'Георгиевич',             -- middle_name
+    '+7912000000',            -- phone
+    1                         -- address_id
 );
+
+Теперь в Supplier появится запись (ID=100), а в Supplier_Login (100, 'sup1').
+(iii) Если sup1 внесёт поставку Supply(supplier_id=100), в my_supplies_view она будет видна только ему.
 */
---        Теперь в Supplier появится запись (ID=100), а в Supplier_Login (100, 'sup1').
---   (iii) Если sup1 внесёт поставку Supply(supplier_id=100), в my_supplies_view она будет видна только ему.
 
 
 --------------------------------------------------------------------------
