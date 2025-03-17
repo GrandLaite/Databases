@@ -256,6 +256,9 @@ GRANT SELECT ON my_supplies_view TO supplier_role;
 /*
 CREATE USER sup1 WITH PASSWORD '1';
 GRANT supplier_role TO sup1;
+CREATE USER sup2 WITH PASSWORD '1';
+GRANT supplier_role TO sup2;
+
 (ii) Подключаемся под sup1:
 CALL register_supplier(
     1,                      -- supplier_id
@@ -264,6 +267,15 @@ CALL register_supplier(
     'Хойкович',             -- middle_name
     '+7912000000',            -- phone
     1                         -- address_id
+);
+
+CALL register_supplier(
+    2,                      -- supplier_id
+    'Ганс',               -- last_name
+    'Апстер',                -- first_name
+    'Хойт',             -- middle_name
+    '+7912512421',            -- phone
+    2                         -- address_id
 );
 
 -- Подключаемся под зарегистрированного поставщика (например, `sup1`) и добавляем поставки
