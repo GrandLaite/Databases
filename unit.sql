@@ -192,7 +192,7 @@ CREATE TABLE Supplier_Login (
 );
 
 -- 3) Процедура \"register_supplier\" (авторегистрация)
-CREATE OR REPLACE PROCEDURE register_supplier(
+CREATE OR REPLACE FUNCTION register_supplier(
     new_supplier_id INT,
     new_last_name   TEXT,
     new_first_name  TEXT,
@@ -200,6 +200,7 @@ CREATE OR REPLACE PROCEDURE register_supplier(
     new_phone       TEXT,
     new_address_id  INT
 )
+RETURNS void
 LANGUAGE plpgsql
 AS $$
 BEGIN
@@ -225,6 +226,10 @@ BEGIN
                  new_supplier_id, CURRENT_USER;
 END;
 $$;
+
+-- ДАЁМ ПРАВА supplier_role вызывать эту функцию
+GRANT EXECUTE ON FUNCTION register_supplier(int, text, text, text, text, int)
+  TO supplier_role;
 
 -- 4) Представление \"my_supplies_view\" (только свои поставки)
 CREATE OR REPLACE VIEW my_supplies_view AS
