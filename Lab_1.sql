@@ -272,7 +272,6 @@ DECLARE
     total_in_stock  INT;
     cnt_in_pricing  INT;
 BEGIN
-    -- 1) Проверяем, есть ли такой товар в Pricing
     SELECT COUNT(*)
       INTO cnt_in_pricing
       FROM Pricing
@@ -282,13 +281,11 @@ BEGIN
         RETURN 'Ошибка: product_id=' || p_product_id || ' отсутствует в таблице Pricing!';
     END IF;
 
-    -- 2) Считаем общее количество товара в Supply
     SELECT COALESCE(SUM(quantity), 0)
       INTO total_in_stock
       FROM Supply
      WHERE product_id = p_product_id;
 
-    -- 3) Если товара мало (<10), пробуем обновить цену
     IF total_in_stock < 10 THEN
         UPDATE Pricing
            SET price = p_new_price
@@ -304,9 +301,6 @@ BEGIN
     END IF;
 END;
 $$;
-
-
-
 
 GRANT SELECT ON Supply TO seller_role;
 GRANT SELECT, UPDATE ON Pricing TO seller_role;
@@ -341,6 +335,7 @@ VALUES
 
 Под sel1:
 SELECT update_price_if_stock_low(1, 99.99);
+SELECT * FROM Pricing;
 */
 
 /*
