@@ -323,14 +323,16 @@ VALUES
     (2, 1, CURRENT_DATE, 2, 15);
 
 
+
+/*
+CREATE USER sel1 WITH PASSWORD '1';
+GRANT seller_role TO sel1;
+
 INSERT INTO Pricing (pricing_id, product_id, price, price_date)
 VALUES
   (1, 1, 120.00, CURRENT_DATE),
   (2, 2,  50.00, CURRENT_DATE),
   (3, 3,  75.00, CURRENT_DATE);
-/*
-CREATE USER sel1 WITH PASSWORD '1';
-GRANT seller_role TO sel1;
 
 Под sel1:
 SELECT update_price_if_stock_low(1, 99.99);
