@@ -263,28 +263,44 @@ GRANT SELECT ON Supply TO seller_role;
 
 CREATE OR REPLACE FUNCTION update_price_if_stock_low(
     p_product_id INT,
-    p_new_price DECIMAL(10,2)
+    p_new_price  DECIMAL(10,2)
 )
 RETURNS TEXT
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    total_in_stock  INT;
-    cnt_in_pricing  INT;
+    total_in_stock   INT;
+    my_supplier_id   INT;
+    cnt_in_pricing   INT;
 BEGIN
+    -- 1) Определяем, какой supplier_id привязан к CURRENT_USER
+    SELECT s.supplier_id
+      INTO my_supplier_id
+      FROM Supplier s
+      JOIN Supplier_Login sl ON s.supplier_id = sl.supplier_id
+     WHERE sl.login = CURRENT_USER
+     LIMIT 1;
+
+    IF my_supplier_id IS NULL THEN
+        RETURN 'Ошибка: вы не являетесь поставщиком (нет supplier_id для текущего пользователя).';
+    END IF;
+
+    -- 2) Проверяем, есть ли такой товар в Pricing
     SELECT COUNT(*)
       INTO cnt_in_pricing
       FROM Pricing
      WHERE product_id = p_product_id;
 
     IF cnt_in_pricing = 0 THEN
-        RETURN 'Ошибка: product_id=' || p_product_id || ' отсутствует в таблице Pricing!';
+        RETURN 'Ошибка: нет цены для product_id=' || p_product_id;
     END IF;
 
+    -- 3) Смотрим, сколько именно У ЭТОГО ПОСТАВЩИКА товара
     SELECT COALESCE(SUM(quantity), 0)
       INTO total_in_stock
       FROM Supply
-     WHERE product_id = p_product_id;
+     WHERE supplier_id = my_supplier_id
+       AND product_id = p_product_id;
 
     IF total_in_stock < 10 THEN
         UPDATE Pricing
@@ -295,9 +311,9 @@ BEGIN
                FROM Pricing
                WHERE product_id = p_product_id
            );
-        RETURN 'Цена обновлена.';
+        RETURN 'Цена обновлена (остаток < 10 у поставщика='||my_supplier_id||').';
     ELSE
-        RETURN 'Невозможно обновить цену: количество >= 10.';
+        RETURN 'Невозможно обновить цену: у вас ' || total_in_stock || ' шт. (>=10).';
     END IF;
 END;
 $$;
