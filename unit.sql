@@ -1,20 +1,14 @@
--- =========================
--- (0) СОЗДАНИЕ ТАБЛИЦ ПО СХЕМЕ
--- =========================
-
 /*
 Вариант №1
 Спроектируйте базу данных, которая используется для автоматизации технологического процесса
 в крупной фирме, осуществляющей оптовую торговлю промышленными товарами.
 */
 
--- 1) Страны
 CREATE TABLE Country (
     country_id INT PRIMARY KEY,
     country_name VARCHAR(255) NOT NULL
 );
 
--- 2) Города
 CREATE TABLE City (
     city_id INT PRIMARY KEY,
     country_id INT,
@@ -22,7 +16,6 @@ CREATE TABLE City (
     FOREIGN KEY (country_id) REFERENCES Country(country_id)
 );
 
--- 3) Улицы
 CREATE TABLE Street (
     street_id INT PRIMARY KEY,
     city_id INT,
@@ -30,7 +23,6 @@ CREATE TABLE Street (
     FOREIGN KEY (city_id) REFERENCES City(city_id)
 );
 
--- 4) Адреса поставщиков
 CREATE TABLE Supplier_Address (
     address_id INT PRIMARY KEY,
     street_id INT,
@@ -38,7 +30,6 @@ CREATE TABLE Supplier_Address (
     FOREIGN KEY (street_id) REFERENCES Street(street_id)
 );
 
--- 5) Адреса клиентов
 CREATE TABLE Customer_Address (
     address_id INT PRIMARY KEY,
     street_id INT,
@@ -46,7 +37,6 @@ CREATE TABLE Customer_Address (
     FOREIGN KEY (street_id) REFERENCES Street(street_id)
 );
 
--- 6) Таблица поставщиков
 CREATE TABLE Supplier (
     supplier_id INT PRIMARY KEY,
     last_name VARCHAR(255),
@@ -57,13 +47,11 @@ CREATE TABLE Supplier (
     FOREIGN KEY (address_id) REFERENCES Supplier_Address(address_id)
 );
 
--- 7) Таблица продуктов
 CREATE TABLE Product (
     product_id INT PRIMARY KEY,
     product_name VARCHAR(255)
 );
 
--- 8) Таблица клиентов
 CREATE TABLE Customer (
     customer_id INT PRIMARY KEY,
     last_name VARCHAR(255),
@@ -74,7 +62,6 @@ CREATE TABLE Customer (
     FOREIGN KEY (address_id) REFERENCES Customer_Address(address_id)
 );
 
--- 9) Таблица поставок
 CREATE TABLE Supply (
     supply_id INT PRIMARY KEY,
     supplier_id INT,
@@ -85,7 +72,6 @@ CREATE TABLE Supply (
     FOREIGN KEY (product_id) REFERENCES Product(product_id)
 );
 
--- 10) Таблица цен
 CREATE TABLE Pricing (
     pricing_id INT PRIMARY KEY,
     product_id INT,
@@ -94,7 +80,6 @@ CREATE TABLE Pricing (
     FOREIGN KEY (product_id) REFERENCES Product(product_id)
 );
 
--- 11) Заказы клиентов
 CREATE TABLE Customer_Order (
     order_id INT PRIMARY KEY,
     order_date DATE,
@@ -105,35 +90,26 @@ CREATE TABLE Customer_Order (
     FOREIGN KEY (product_id) REFERENCES Product(product_id)
 );
 
-
---------------------------------------------------------------------------
--- (1) ЗАПОЛНЯЕМ ОСНОВНЫЕ СПРАВОЧНЫЕ ДАННЫЕ
---------------------------------------------------------------------------
--- Шаг 1. Добавляем Страны (Россия, Китай)
 INSERT INTO Country (country_id, country_name)
 VALUES
   (1, 'Россия'),
   (2, 'Китай');
 
--- Шаг 2. Добавляем Города
 INSERT INTO City (city_id, country_id, city_name)
 VALUES
   (1, 1, 'Москва'),
   (2, 2, 'Пекин');
 
--- Шаг 3. Добавляем Улицы
 INSERT INTO Street (street_id, city_id, street_name)
 VALUES
-  (1, 1, 'Ленина'),  -- Москва
-  (2, 2, 'Мао');     -- Пекин
+  (1, 1, 'Ленина'),  
+  (2, 2, 'Мао');   
 
--- Шаг 4. Адреса поставщиков
 INSERT INTO Supplier_Address (address_id, street_id, building)
 VALUES
   (1, 1, '25А'),
   (2, 2, '25А');
 
--- Шаг 5. Адреса клиентов
 INSERT INTO Customer_Address (address_id, street_id, building)
 VALUES
   (1, 1, '10'),
@@ -141,14 +117,12 @@ VALUES
   (3, 2, '8'),
   (4, 2, '16');
 
--- Шаг 6. Добавляем Продукты
 INSERT INTO Product (product_id, product_name)
 VALUES
   (1, 'Молоко'),
   (2, 'Хлеб'),
   (3, 'Сахар');
 
--- Шаг 7. Тестовые Клиенты (для проверки)
 INSERT INTO Customer (customer_id, last_name, first_name, middle_name, birth_date, address_id)
 VALUES
   (1, 'Иванов', 'Иван', 'Иванович', '1980-01-01', 1),
@@ -162,18 +136,10 @@ VALUES
   (9, 'Григорьев', 'Григорий', 'Григорьевич', '1999-12-31', 4),
   (10,'Александров', 'Александр', 'Александрович','1989-06-06', 4);
 
-
---------------------------------------------------------------------------
--- (2) ДАЁМ ПРАВО ПОСТАВЩИКУ ПРОСМАТРИВАТЬ СВОИ ПОСТАВКИ + АВТОРЕГИСТРАЦИЯ
---------------------------------------------------------------------------
--- 1) Создаём роль \"supplier_role\"
+-- Логика регистрации поставщика
 CREATE ROLE supplier_role;
-GRANT USAGE ON SCHEMA public TO supplier_role;
-GRANT CREATE ON SCHEMA public TO supplier_role;
--- Сначала даём право supplier_role работать со схемой:
 GRANT USAGE, CREATE ON SCHEMA public TO supplier_role;
 
--- Теперь разрешаем по умолчанию все необходимые права на новые объекты в схеме:
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
   GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO supplier_role;
 
@@ -184,14 +150,12 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public
   GRANT EXECUTE ON FUNCTIONS TO supplier_role;
 
 
--- 2) Таблица Supplier_Login (привязка supplier_id -> CURRENT_USER)
 CREATE TABLE Supplier_Login (
     supplier_id INT,
     login VARCHAR(32),
     CONSTRAINT fk_supplier_login FOREIGN KEY (supplier_id) REFERENCES Supplier(supplier_id)
 );
 
--- 3) Процедура \"register_supplier\" (авторегистрация)
 CREATE OR REPLACE PROCEDURE register_supplier(
     new_supplier_id INT,
     new_last_name   TEXT,
@@ -226,10 +190,13 @@ BEGIN
 END;
 $$;
 
--- ДАЁМ ПРАВА supplier_role вызывать процедуру
 GRANT EXECUTE ON PROCEDURE register_supplier(int, text, text, text, text, int)
   TO supplier_role;
--- 4) Представление \"my_supplies_view\" (только свои поставки)
+
+
+/*
+1.Дать право поставщику просматривать свои поставки.
+*/
 CREATE OR REPLACE VIEW my_supplies_view AS
 SELECT
     sp.supply_id,
@@ -242,7 +209,6 @@ JOIN Supplier       s  ON sp.supplier_id = s.supplier_id
 JOIN Supplier_Login sl ON s.supplier_id = sl.supplier_id
 WHERE sl.login = CURRENT_USER;
 
--- 5) Права
 GRANT EXECUTE ON PROCEDURE register_supplier(
     INT, TEXT, TEXT, TEXT, TEXT, INT
 )
@@ -259,7 +225,7 @@ GRANT supplier_role TO sup1;
 CREATE USER sup2 WITH PASSWORD '1';
 GRANT supplier_role TO sup2;
 
-(ii) Подключаемся под sup1:
+Подключаемся под sup1:
 CALL register_supplier(
     1,                      -- supplier_id
     'Чиназес',               -- last_name
@@ -269,6 +235,7 @@ CALL register_supplier(
     1                         -- address_id
 );
 
+Подключаемся под sup2:
 CALL register_supplier(
     2,                      -- supplier_id
     'Ганс',               -- last_name
@@ -278,7 +245,7 @@ CALL register_supplier(
     2                         -- address_id
 );
 
--- Подключаемся под зарегистрированного поставщика (например, `sup1`) и добавляем поставки
+Подключаемся под postgres и создаём две поставки для разных людей
 INSERT INTO Supply (supply_id, supplier_id, supply_date, product_id, quantity)
 VALUES 
     (1, 1, CURRENT_DATE, 1, 8),  
@@ -286,15 +253,14 @@ VALUES
 
 SELECT * FROM my_supplies_view;
 */
------------------------------------------------------------------------
--- (3) ДАЁМ ПРАВО ПРОДАВЦУ ИЗМЕНЯТЬ СТОИМОСТЬ ТОВАРА, ЕСЛИ < 10 ШТ. В НАЛИЧИИ
---------------------------------------------------------------------------
--- 1) Роль продавца
+
+/*
+2.Дать поставщику право обновить цену на товар, если количество товара составляет меньше 10.
+*/
 CREATE ROLE seller_role;
 
 GRANT SELECT ON Supply TO seller_role;
 
--- Функция обновления цены при низком количестве товара
 CREATE OR REPLACE FUNCTION update_price_if_stock_low(
     p_product_id INT,
     p_new_price DECIMAL(10,2)
@@ -306,7 +272,6 @@ DECLARE
     total_in_stock  INT;
     cnt_in_pricing  INT;
 BEGIN
-    -- 1) Проверяем, есть ли такой товар в Pricing
     SELECT COUNT(*)
       INTO cnt_in_pricing
       FROM Pricing
@@ -316,13 +281,11 @@ BEGIN
         RETURN 'Ошибка: product_id=' || p_product_id || ' отсутствует в таблице Pricing!';
     END IF;
 
-    -- 2) Считаем общее кол-во товара в Supply
     SELECT COALESCE(SUM(quantity), 0)
       INTO total_in_stock
       FROM Supply
      WHERE product_id = p_product_id;
 
-    -- 3) Если товара мало (<10), пробуем обновить цену
     IF total_in_stock < 10 THEN
         UPDATE Pricing
            SET price = p_new_price
@@ -332,22 +295,17 @@ BEGIN
                FROM Pricing
                WHERE product_id = p_product_id
            );
-        RETURN 'Цена обновлена (stock < 10).';
+        RETURN 'Цена обновлена.';
     ELSE
-        RETURN 'Невозможно обновить цену: stock >= 10.';
+        RETURN 'Невозможно обновить цену: количество >= 10.';
     END IF;
 END;
 $$;
 
 
--- Даем право выполнять функцию
--- Разрешаем смотреть количество товаров
+
 GRANT SELECT ON Supply TO seller_role;
-
--- Разрешаем смотреть Pricing, чтобы WHERE и подзапрос работали
 GRANT SELECT, UPDATE ON Pricing TO seller_role;
-
--- Даем право выполнять саму функцию
 GRANT EXECUTE ON FUNCTION update_price_if_stock_low(INT, DECIMAL) TO seller_role;
 
 GRANT EXECUTE ON PROCEDURE register_supplier(
@@ -355,15 +313,14 @@ GRANT EXECUTE ON PROCEDURE register_supplier(
 )
 TO seller_role;
 
-
 GRANT INSERT ON Supplier       TO seller_role;
 GRANT INSERT ON Supplier_Login TO seller_role;
 GRANT INSERT ON Supply TO seller_role;
 
 INSERT INTO Supply (supply_id, supplier_id, supply_date, product_id, quantity)
 VALUES 
-    (1, 1, CURRENT_DATE, 1, 8),   -- Поставщик 1 поставляет 8 единиц товара 1
-    (2, 1, CURRENT_DATE, 2, 15);  -- Поставщик 1 поставляет 15 единиц товара 2
+    (1, 1, CURRENT_DATE, 1, 8),   
+    (2, 1, CURRENT_DATE, 2, 15);  
 /*
 CREATE USER sel1 WITH PASSWORD '1';
 GRANT seller_role TO sel1;
@@ -371,13 +328,12 @@ GRANT seller_role TO sel1;
 Под sel1:
 SELECT update_price_if_stock_low(1, 99.99);
 */
---------------------------------------------------------------------------
--- (4) ДАЁМ ПРАВО АДМИНИСТРАТОРУ СЧИТЫВАТЬ \"10%\" ИЗ СЕРЕДИНЫ ТАБЛИЦЫ CUSTOMER
---------------------------------------------------------------------------
--- 1) Роль администратора
+
+/*
+3.Дать право администратору считывать 10% из середины таблицы Customer.
+*/
 CREATE ROLE admin_role;
 
--- 2) Представление middle_10_percent_customers
 CREATE OR REPLACE VIEW middle_10_percent_customers AS
 WITH cte AS (
     SELECT
@@ -392,19 +348,17 @@ WHERE rn >= 0.45 * total_count
   AND rn <= 0.55 * total_count;
 
 GRANT SELECT ON middle_10_percent_customers TO admin_role;
+/*
+CREATE USER admin1 WITH PASSWORD '1'; 
+GRANT admin_role TO admin1;
+Под admin1: SELECT * FROM middle_10_percent_customers;
+*/
 
--- Пример:
---   (i)  Админ: CREATE USER admin1 WITH PASSWORD '1'; GRANT admin_role TO admin1;
---   (ii) admin1: SELECT * FROM middle_10_percent_customers;
---        Получим \"около 10%\" строк, расположенных в середине.
-
-
---------------------------------------------------------------------------
--- (5) ТОВАРОВЕДУ / ПРОДАВЦУ: ВСТАВКА ПОСТАВКИ, ЕСЛИ ЕЩЁ НЕ СУЩЕСТВУЕТ
---------------------------------------------------------------------------
+/*
+4.Дать право товароведу вставлять информацию о поставке, если в этот день такой же поставки ещё не было.
+*/
 CREATE ROLE merchandiser_role;
 
--- Функция insert_supply_if_not_exists
 CREATE SEQUENCE IF NOT EXISTS supply_seq START 1000;
 
 CREATE OR REPLACE FUNCTION insert_supply_if_not_exists(
@@ -455,13 +409,14 @@ GRANT USAGE, SELECT ON SEQUENCE supply_seq TO merchandiser_role;
 CREATE USER merch1 WITH PASSWORD '1';
 GRANT merchandiser_role TO merch1;
 Под merch1:
+(supplier_id,supply_date,product_id,quantity)
 SELECT insert_supply_if_not_exists(100, CURRENT_DATE, 1, 10);
 Если нет такой записи, вставит; если уже существует, вернёт ошибку.
 */
 
---------------------------------------------------------------------------
--- (6) ДАЁМ ПРАВО АДМИНИСТРАТОРУ IT УДАЛЯТЬ ПРОЦЕДУРЫ
---------------------------------------------------------------------------
+/*
+5.Дать право администратору IT удалять процедуры.
+*/
 CREATE ROLE admin_it_role;
 
 CREATE OR REPLACE PROCEDURE test_procedure()
@@ -486,10 +441,7 @@ DROP PROCEDURE test_procedure();
 --------------------------------------------------------------------------
 -- (7) ДОПОЛНИТЕЛЬНЫЕ ТЕСТОВЫЕ ДАННЫЕ ДЛЯ ПРОВЕРКИ
 --------------------------------------------------------------------------
--- Пример поставщиков / поставок, чтобы всё работало из коробки.
--- (Можно расширять и изменять при необходимости)
 
--- 3) Цены
 INSERT INTO Pricing (pricing_id, product_id, price, price_date)
 VALUES
   (1, 1, 120.00, CURRENT_DATE),
