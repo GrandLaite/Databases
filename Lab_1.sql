@@ -320,7 +320,14 @@ GRANT INSERT ON Supply TO seller_role;
 INSERT INTO Supply (supply_id, supplier_id, supply_date, product_id, quantity)
 VALUES 
     (1, 1, CURRENT_DATE, 1, 8),   
-    (2, 1, CURRENT_DATE, 2, 15);  
+    (2, 1, CURRENT_DATE, 2, 15);
+
+
+INSERT INTO Pricing (pricing_id, product_id, price, price_date)
+VALUES
+  (1, 1, 120.00, CURRENT_DATE),
+  (2, 2,  50.00, CURRENT_DATE),
+  (3, 3,  75.00, CURRENT_DATE);
 /*
 CREATE USER sel1 WITH PASSWORD '1';
 GRANT seller_role TO sel1;
@@ -411,7 +418,6 @@ GRANT merchandiser_role TO merch1;
 Под merch1:
 (supplier_id,supply_date,product_id,quantity)
 SELECT insert_supply_if_not_exists(100, CURRENT_DATE, 1, 10);
-Если нет такой записи, вставит; если уже существует, вернёт ошибку.
 */
 
 /*
@@ -437,34 +443,3 @@ GRANT admin_it_role TO it_admin;
 Под it_admin:
 DROP PROCEDURE test_procedure();
 */
-
---------------------------------------------------------------------------
--- (7) ДОПОЛНИТЕЛЬНЫЕ ТЕСТОВЫЕ ДАННЫЕ ДЛЯ ПРОВЕРКИ
---------------------------------------------------------------------------
-
-INSERT INTO Pricing (pricing_id, product_id, price, price_date)
-VALUES
-  (1, 1, 120.00, CURRENT_DATE),
-  (2, 2,  50.00, CURRENT_DATE),
-  (3, 3,  75.00, CURRENT_DATE);
-
--- 4) Проверка продавца:
---    CREATE USER sel1 WITH PASSWORD '1'; GRANT seller_role TO sel1;
---    Под sel1:
---       SELECT update_price_if_stock_low(2, 45.00);
---    Если суммарно товара 2 < 10 штук, цена сменится на 45.00.
-
--- 5) Проверка товароведа:
---    CREATE USER merch1 WITH PASSWORD '1'; GRANT merchandiser_role TO merch1;
---    Под merch1:
---       SELECT insert_supply_if_not_exists(1, CURRENT_DATE, 2, 10);
---    Добавит новую поставку, если такой ещё нет (supplier_id=1, product_id=2, date=сегодня).
-
--- 6) Проверка авторегистрации поставщика:
---    CREATE USER supA WITH PASSWORD '1'; GRANT supplier_role TO supA;
---    Под supA:
---       CALL register_supplier(200, 'Лебедев', 'Лев', 'Львович', '+79009990000', 2);
---    Теперь в Supplier появится (ID=200), в Supplier_Login привязка (200, 'supA').
---    Любые поставки, где supplier_id=200, будут видны только supA через my_supplies_view.
-
--- На этом все пять пунктов задания закрыты.
