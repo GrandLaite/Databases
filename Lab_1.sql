@@ -390,7 +390,7 @@ BEGIN
        AND supply_date = p_supply_date;
 
     IF existing_count > 0 THEN
-        RETURN 'Error: такая поставка (supplier+product+date) уже есть.';
+        RETURN 'Такая поставка (supplier+product+date) уже есть.';
     END IF;
 
     INSERT INTO Supply(supply_id, supplier_id, supply_date, product_id, quantity)
@@ -402,7 +402,7 @@ BEGIN
         p_quantity
     );
 
-    RETURN 'Success: новая поставка добавлена.';
+    RETURN 'Новая поставка добавлена.';
 END;
 $$;
 
@@ -419,7 +419,19 @@ CREATE USER merch1 WITH PASSWORD '1';
 GRANT merchandiser_role TO merch1;
 Под merch1:
 (supplier_id,supply_date,product_id,quantity)
-SELECT insert_supply_if_not_exists(100, CURRENT_DATE, 1, 10);
+SELECT insert_supply_if_not_exists(3, CURRENT_DATE, 1, 10);
+
+CREATE USER sup3 WITH PASSWORD '1';
+GRANT supplier_role TO sup3;
+Подключаемся под sup3:
+CALL register_supplier(
+    3,                      -- supplier_id
+    'Лагстар',               -- last_name
+    'Йозец',                -- first_name
+    'Крайцберг',             -- middle_name
+    '+7912000000',            -- phone
+    1                         -- address_id
+);
 */
 
 /*
