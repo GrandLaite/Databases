@@ -138,3 +138,114 @@ VALUES (1, 'Петров', 'Пётр', 'Петрович', '1985-02-03', 2);
 -- 11. Добавляем заказ покупателя на товар
 INSERT INTO Customer_Order (order_id, order_date, customer_id, product_id, quantity)
 VALUES (1, CURRENT_DATE, 1, 1, 10);
+
+/*************************************************************
+* 1. ДОБАВЛЕНИЕ НОВЫХ ПОЛЬЗОВАТЕЛЕЙ С ВЗАИМНОЙ ДРУЖБОЙ
+*************************************************************/
+db.users.insertMany([
+  {
+    _id: ObjectId("664600000000000000000008"),
+    username: "vera",
+    email: "vera@social.local",
+    full_name: "Вера Зайцева",
+    date_of_birth: ISODate("1996-12-21T00:00:00Z"),
+    gender: "female",
+    registration_date: ISODate("2024-04-16T11:10:00Z"),
+    friends: [
+      ObjectId("664600000000000000000009"), // nikita
+      ObjectId("664600000000000000000002")  // bob
+    ],
+    interests: ["music", "photography"],
+    location: { city: "Калуга", country: "Россия" },
+    status: "На позитиве!"
+  },
+  {
+    _id: ObjectId("664600000000000000000009"),
+    username: "nikita",
+    email: "nikita@social.local",
+    full_name: "Никита Сергеев",
+    date_of_birth: ISODate("1998-09-13T00:00:00Z"),
+    gender: "male",
+    registration_date: ISODate("2024-04-16T11:12:00Z"),
+    friends: [
+      ObjectId("664600000000000000000008"), // vera
+      ObjectId("664600000000000000000001")  // alice
+    ],
+    interests: ["gaming", "travel"],
+    location: { city: "Омск", country: "Россия" },
+    status: "Жду выходных!"
+  }
+]);
+
+
+/*************************************************************
+* 2. ОБНОВЛЕНИЕ FRIENDS ДЛЯ СУЩЕСТВУЮЩИХ ПОЛЬЗОВАТЕЛЕЙ
+*************************************************************/
+
+// vera <-> bob взаимная
+db.users.updateOne(
+  { _id: ObjectId("664600000000000000000002") }, // bob
+  { $addToSet: { friends: ObjectId("664600000000000000000008") } }
+);
+db.users.updateOne(
+  { _id: ObjectId("664600000000000000000008") }, // vera
+  { $addToSet: { friends: ObjectId("664600000000000000000002") } }
+);
+
+// nikita <-> alice взаимная
+db.users.updateOne(
+  { _id: ObjectId("664600000000000000000001") }, // alice
+  { $addToSet: { friends: ObjectId("664600000000000000000009") } }
+);
+
+// fiona <-> ivanov взаимная
+db.users.updateOne(
+  { _id: ObjectId("664600000000000000000006") }, // fiona
+  { $addToSet: { friends: ObjectId("664600000000000000000007") } }
+);
+
+// dasha <-> bob взаимная
+db.users.updateOne(
+  { _id: ObjectId("664600000000000000000002") }, // bob
+  { $addToSet: { friends: ObjectId("664600000000000000000004") } }
+);
+db.users.updateOne(
+  { _id: ObjectId("664600000000000000000004") }, // dasha
+  { $addToSet: { friends: ObjectId("664600000000000000000002") } }
+);
+
+
+/*************************************************************
+* 3. ВЫПОЛНЕНИЕ ЗАПРОСА НА ВЗАИМНЫХ ДРУЗЕЙ
+*************************************************************/
+db.users.aggregate([
+  { $unwind: "$friends" },
+  {
+    $lookup: {
+      from: "users",
+      localField: "friends",
+      foreignField: "_id",
+      as: "friend_doc"
+    }
+  },
+  { $unwind: "$friend_doc" },
+  {
+    $match: { $expr: { $in: ["$_id", "$friend_doc.friends"] } }
+  },
+  {
+    $project: { _id:0, user1:"$username", user2:"$friend_doc.username" }
+  },
+  {
+    $addFields: {
+      pair: {
+        $cond: [
+          { $gt: ["$user1","$user2"] },
+          ["$user2","$user1"],
+          ["$user1","$user2"]
+        ]
+      }
+    }
+  },
+  { $group: { _id: "$pair" } },
+  { $project: { _id:0, mutual_friends:"$_id" } }
+]);
