@@ -3,7 +3,7 @@
 TODAY=$(date +%Y-%m-%d)
 TEMP_DIR="/var/tmp/prelogs"
 
-docker exec -i kind-control-plane bash zxc.sh
+docker exec kind-control-plane bash zxc.sh
 
 docker exec kind-control-plane find / -path /sys -prune -o -type f -name "log_${TODAY}*cursed*.txt" -print | while read -r file; do
     docker cp "kind-control-plane:$file" "$TEMP_DIR"
