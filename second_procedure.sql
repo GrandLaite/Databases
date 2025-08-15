@@ -147,10 +147,10 @@ BEGIN
         IF current_stock < forecast THEN
             INSERT INTO Supply (supplier_id, supply_date, product_id, quantity)
             VALUES (
-                1,               -- Поставщик с ID 1
-                CURRENT_DATE,    -- Текущая дата поставки
+                1,               
+                CURRENT_DATE,    
                 product.product_id,
-                forecast         -- Количество согласно прогнозу
+                forecast     
             );
 
             RAISE NOTICE 'ID товара: %, Поставлено: %, Продано: %, Текущий остаток: %, Прогноз: %',
@@ -247,4 +247,5 @@ LEFT JOIN SalesData sales ON p.product_id = sales.product_id
 WHERE COALESCE(supply.total_supplied, 0) > 0
    OR COALESCE(sales.total_sold, 0) > 0
    OR COALESCE(supply.total_supplied, 0) - COALESCE(sales.total_sold, 0) > 0
+
    OR COALESCE(sales.forecast, 0) > 0;
