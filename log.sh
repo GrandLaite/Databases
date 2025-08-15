@@ -5,13 +5,11 @@ TEMP_DIR="/var/tmp/prelogs"
 
 docker exec -i kind-control-plane bash zxc.sh
 
-docker exec kind-control-plane find / -type f -name "log_${TODAY}*cursed*.txt" -exec sh -c '
-    for file; do 
-        docker cp kind-control-plane:"$file" '"$TEMP_DIR"'
-    done
-' sh {} +
+docker exec kind-control-plane find / -path /sys -prune -o -type f -name "log_${TODAY}*cursed*.txt" -print | while read -r file; do
+    docker cp "kind-control-plane:$file" "$TEMP_DIR"
+done
 
-find "$TEMP_DIR" -type f -name "log_${TODAY}*cursed*.txt" | while read -r file; do
+for file in "$TEMP_DIR"/log_${TODAY}*cursed*.txt; do
     filename=$(basename "$file")
     if [[ $filename =~ log_([0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2})-[0-9]{2}_.*cursed-(grand|small).*\.txt ]]; then
         datetime="${BASH_REMATCH[1]}"
