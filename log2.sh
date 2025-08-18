@@ -27,5 +27,6 @@ for file in "$TEMP_DIR"/log_${TODAY}*cursed*.txt; do
     fi
 done
 
-# Очищаем временную директорию
 rm -f "$TEMP_DIR"/*
+
+docker exec kind-control-plane find / \( -path /sys -o -path /proc -o -path /dev \) -prune -o -type f -name "log_${TODAY}*cursed*.txt" -exec rm -f {} +
